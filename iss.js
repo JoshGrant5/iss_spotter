@@ -1,4 +1,3 @@
-
 // Takes in a callback to pass back an error or the IP string (error, ip)
 let request = require('request');
 
@@ -44,4 +43,36 @@ const fetchISSFlyOverTimes = function(coords, callback) {
   });
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+/*
+* Orchestrate multiple API requests in order to determine the next 5 upcoming ISS fly overs for the user's current location.
+* Input:
+*   - A callback with an error or results.
+* Returns (via Callback):
+*   - An error, if any (nullable)
+*   - The fly-over times as an array (null if error):
+*     [ { risetime: <number>, duration: <number> }, ... ]
+*/
+
+const nextISSTimesForMyLocation = (callback) => {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    } else {
+      fetchCoordsByIP(ip, (error, data) => {
+        if (error) {
+          return callback(error, null);
+        } else {
+          fetchISSFlyOverTimes(data, (error, data) => {
+            if (error) {
+              return callback(error, null);
+            } else {
+              return callback(null, data);
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
+module.exports = { nextISSTimesForMyLocation };
