@@ -24,10 +24,24 @@ const fetchCoordsByIP = (ip, callback) => {
       const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
       return callback(Error(msg), null);
     } else {
-      let coordinates = { latitude: JSON.parse(body).data.latitude, longitude: JSON.parse(body).data.longitude }
+      let coordinates = { latitude: JSON.parse(body).data.latitude, longitude: JSON.parse(body).data.longitude };
       return callback(null, coordinates);
     }
   });
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP };
+// Takes in an object with keys latitude nad longitude, and a callback to pass an error or the array of resulting data
+const fetchISSFlyOverTimes = function(coords, callback) {
+  request(`http://api.open-notify.org/iss-pass.json?lat=${coords.latitude}&lon=${coords.longitude}`, (error, response, body) => {
+    if (error) {
+      return callback(error, null);
+    } else if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching FlyOverTime. Response: ${body}`;
+      return callback(Error(msg), null);
+    } else {
+      return callback(null, JSON.parse(body).response);
+    }
+  });
+};
+
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
