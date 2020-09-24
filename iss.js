@@ -65,8 +65,14 @@ const nextISSTimesForMyLocation = (callback) => {
           fetchISSFlyOverTimes(data, (error, data) => {
             if (error) {
               return callback(error, null);
-            } else {
-              return callback(null, data);
+            } else { // Convert Unix timestamp to UTC string of date
+              let output = '';
+              for (timestamp of data) {
+                let date = new Date(timestamp.risetime * 1000);
+                let dateString = date.toUTCString();
+                output += `Next pass at ${dateString} (Pacific Daylight Time) for ${timestamp.duration} seconds!\n`;
+              }
+              return callback(null, output);
             }
           });
         }
